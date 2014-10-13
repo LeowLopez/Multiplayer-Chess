@@ -1,169 +1,50 @@
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-<link rel="stylesheet" type="text/css" href="tabuleiro.css" media="screen" />
-<body>
-
-<table id="chess_board" cellpadding="0" cellspacing="0">
-
-    <tr>
-
-        <td id="A8"><a href="#" class="rook black">&#9820;</a></td>
-
-        <td id="B8"><a href="#" class="night black">&#9822;</a></td>
-
-        <td id="C8"><a href="#" class="bishop black">&#9821;</a></td>
-        <td id="D8"><a href="#" class="king black">&#9819;</a></td>
-        <td id="E8"><a href="#" class="queen black">&#9818;</a></td>
-        <td id="F8"><a href="#" class="bishop black">&#9821;</a></td>
-
-        <td id="G8"><a href="#" class="night black">&#9822;</a></td>
-
-        <td id="H8"><a href="#" class="rook black">&#9820;</a></td>
-
-    </tr>
-
-    <tr>
-
-        <td id="A7"><a href="#" class="pawn black">&#9823;</a></td>
-        <td id="B7"><a href="#" class="pawn black">&#9823;</a></td>
-
-        <td id="C7"><a href="#" class="pawn black">&#9823;</a></td>
-
-        <td id="D7"><a href="#" class="pawn black">&#9823;</a></td>
-
-        <td id="E7"><a href="#" class="pawn black">&#9823;</a></td>
-        <td id="F7"><a href="#" class="pawn black">&#9823;</a></td>
-
-        <td id="G7"><a href="#" class="pawn black">&#9823;</a></td>
-
-        <td id="H7"><a href="#" class="pawn black">&#9823;</a></td>
-
-    </tr>
-
-    <tr>
-
-        <td id="A6"></td>
-
-        <td id="B6"></td>
-
-        <td id="C6"></td>
-
-        <td id="D6"></td>
-
-        <td id="E6"></td>
-
-        <td id="F6"></td>
-
-        <td id="G6"></td>
-
-        <td id="H6"></td>
-
-    </tr>
-
-    <tr>
-
-        <td id="A5"></td>
-
-        <td id="B5"></td>
-
-        <td id="C5"></td>
-
-        <td id="D5"></td>
-
-        <td id="E5"></td>
-
-        <td id="F5"></td>
-
-        <td id="G5"></td>
-
-        <td id="H5"></td>
-
-    </tr>
-
-    <tr>
-   <td id="A4"></td>
-
-        <td id="B4"></td>
-
-        <td id="C4"></td>
-
-        <td id="D4"></td>
-
-        <td id="E4"></td>
-
-        <td id="F4"></td>
-
-        <td id="G4"></td>
-
-        <td id="H4"></td>
-
-    </tr>
-
-    <tr>
-
-        <td id="A3"></td>
-
-        <td id="B3"></td>
-
-        <td id="C3"></td>
-
-        <td id="D3"></td>
-
-        <td id="E3"></td>
-
-        <td id="F3"></td>
-
-        <td id="G3"></td>
-
-        <td id="H3"></td>
-
-    </tr>
-
-    <tr>
-
-        <td id="A2"><a href="#" class="pawn white">&#9817;</a></td>
-
-        <td id="B2"><a href="#" class="pawn white">&#9817;</a></td>
-
-        <td id="C2"><a href="#" class="pawn white">&#9817;</a></td>
-
-        <td id="D2"><a href="#" class="pawn white">&#9817;</a></td>
-
-        <td id="E2"><a href="#" class="pawn white">&#9817;</a></td>
-
-        <td id="F2"><a href="#" class="pawn white">&#9817;</a></td>
-
-        <td id="G2"><a href="#" class="pawn white">&#9817;</a></td>
-
-        <td id="H2"><a href="#" class="pawn white">&#9817;</a></td>
-
-    </tr>
-
-    <tr>
-
-        <td id="A1"><a href="#" class="rook white">&#9814;</a></td>
-
-        <td id="B1"><a href="#" class="night white">&#9816;</a></td>
-
-        <td id="C1"><a href="#" class="bishop white">&#9815;</a></td>
-
-        <td id="D1"><a href="#" class="king white">&#9813;</a></td>
-
-        <td id="E1"><a href="#" class="wife white">&#9812;</a></td>
-
-        <td id="F1"><a href="#" class="bishop white">&#9815;</a></td>
-
-        <td id="G1"><a href="#" class="night white">&#9816;</a></td>
-
-        <td id="H1"><a href="#" class="rook white">&#9814;</a></td>
-
-    </tr>
-
-</table>
-
-</body>
-
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<script type="text/javascript" src="JS/JS.js"></script>
+		<link rel="stylesheet" type="text/css" href="CSS/CSS.css">
+	</head>
+
+	
+	<body onLoad="DarPecas()">
+
+		<table id="chess_board" cellpadding="0" cellspacing="0" width="100%">
+
+		    <tr id="line1">
+		    <td id="00"></td><td id="01"></td><td id="02"></td><td id="03"></td><td id="04"></td><td id="05"></td><td id="06"></td><td id="07"></td>
+		    </tr>
+
+		    <tr id="line2">
+		    <td id="10"></td><td id="11"></td><td id="12"></td><td id="13"></td><td id="14"></td><td id="15"></td><td id="16"></td><td id="17"></td>
+		    </tr>
+
+		    <tr id="line3">
+		    <td id="20"></td><td id="21"></td><td id="22"></td><td id="23"></td><td id="24"></td><td id="25"></td><td id="26"></td><td id="27"></td>
+		    </tr>
+
+		    <tr id="line4">
+		    <td id="30"></td><td id="31"></td><td id="32"></td><td id="33"></td><td id="34"></td><td id="35"></td><td id="36"></td><td id="37"></td>
+		    </tr>
+
+		    <tr id="line5">
+		    <td id="40"></td><td id="41"></td><td id="42"></td><td id="43"></td><td id="44"></td><td id="45"></td><td id="46"></td><td id="47"></td>
+		    </tr>
+
+		    <tr id="line6">
+		    <td id="50"></td><td id="51"></td><td id="52"></td><td id="53"></td><td id="54"></td><td id="55"></td><td id="56"></td><td id="57"></td>
+		    </tr>
+
+		    <tr id="line7">
+		    <td id="60"></td><td id="61"></td><td id="62"></td><td id="63"></td><td id="64"></td><td id="65"></td><td id="66"></td><td id="67"></td>
+		    </tr>
+
+		    <tr id="line8">
+		    <td id="70"></td><td id="71"></td><td id="72"></td><td id="73"></td><td id="74"></td><td id="75"></td><td id="76"></td><td id="77"></td>
+		    </tr>
+
+		</table>
+
+	</body>
+	
 </html>

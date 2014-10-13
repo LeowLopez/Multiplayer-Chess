@@ -6,7 +6,7 @@ a.brancas:hover { color:#0f0;}
 a {
 
     color:#000;
-    display:block;
+    /*display:block;*/
     font-size:60px;
     height:80px;
     position:relative;
@@ -15,6 +15,7 @@ a {
     width:80px;
 
 }
+.clicked{color: orange}
 
 #chess_board { border:5px solid #333; }
 
