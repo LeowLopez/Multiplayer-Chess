@@ -15,6 +15,7 @@ a {
     width:80px;
 
 }
+
 .clicked{color: orange}
 
 #chess_board { border:5px solid #333; }
