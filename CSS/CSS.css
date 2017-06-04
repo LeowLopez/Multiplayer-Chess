@@ -1,47 +1,138 @@
-/* -------------------------- PEÇAS ---------------------------*/
+﻿/* -------------------------- PEÇAS ---------------------------*/
 a.pretas:hover { color:#f00;}
-a.brancas:hover { color:#0f0;}
+a.brancas:hover { color:#00FF9A;}
 
 /* ------------------------ TABULEIRO -----------------------*/
-a {
-
+a.pretas {
     color:#000;
     /*display:block;*/
-    font-size:60px;
-    height:80px;
-    position:relative;
+    font-size:40px;
+    /*height:40px;*/
+    /*position:absolute;*/
+    text-decoration:none;
+    text-shadow:0 0 1px #ccc;
+    width:80px;
+/* ------------ impedir seleção --------------------- */    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+a.brancas {
+    color:#fff;
+    /*display:block;*/
+    font-size:40px;
+    /*height:40px;*/
+    /*position:absolute;*/
+    text-decoration:none;
+    text-shadow:0 0 4px #000;
+    width:80px;
+/* ------------ impedir seleção --------------------- */    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#stats, #xeque {
+    visibility: hidden
+}
+
+.xequed {
+    animation: piscando ease 1s infinite alternate;
+    font-size:40px;
+    color: red;
+    /*height:40px;*/
+    /*position:absolute;*/
+    text-decoration:none;
+    width:80px;
+
+/* ------------ impedir seleção --------------------- */    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+@keyframes piscando {
+   from { 
+    text-shadow: 0 0 3px #f00;
+  }
+   to { 
+    text-shadow: 0 0 1px #ff0;
+  }
+}
+
+/*#content {
+    margin: auto;
+    max-width: 1240px;
+    max-height: 1240px;
+}*/
+
+.clicked {
+    color: orange;
+    font-size:40px;
     text-decoration:none;
     text-shadow:0 1px #fff;
     width:80px;
-
 }
 
-.clicked{color: orange}
+#chess_board{ 
+    /*border:0px solid #333;*/
+    padding:0;
+    border-spacing:0;
+    margin:auto;
+    max-width:448px;
+    max-height:448px;
+    width:100%;
+}
 
-#chess_board { border:5px solid #333; }
+#header {
+    /*border:4px solid #333;*/
+    text-align: center;
+    padding:0;
+    border-spacing:0;
+    margin:auto;
+    width:60%;
+}
 
 #chess_board td {
-
-    background:#fff;
-    background:-moz-linear-gradient(top, #fff, #eee);
-    background:-webkit-gradient(linear,0 0, 0 100%, from(#fff), to(#eee));
+    background:#ccc;
+    background:-moz-linear-gradient(top, #ccc, #fff);
+    background:-webkit-gradient(linear,0 0, 0 100%, from(#CCC), to(#FFF));
     box-shadow:inset 0 0 0 1px #fff;
     -moz-box-shadow:inset 0 0 0 1px #fff;
     -webkit-box-shadow:inset 0 0 0 1px #fff;
-    height:80px;
+    min-height:53px;
+    min-width:53px;
+    height:53px;
+    width:40px;
     text-align:center;
     vertical-align:middle;
-    width:80px;
-
+    /*width:40px;*/
+/* ------------ impedir seleção --------------------- */    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 #chess_board tr:nth-child(odd) td:nth-child(even),
 
 #chess_board tr:nth-child(even) td:nth-child(odd) {
 
-    background:#ccc;
-    background:-moz-linear-gradient(top, #ccc, #eee);
-    background:-webkit-gradient(linear,0 0, 0 100%, from(#ccc), to(#eee));
+    background:#fff;
+    background:-moz-linear-gradient(top, #cfcfcf, #4f4f4f);
+    background:-webkit-gradient(linear,0 0, 0 100%, from(#CFCFCF), to(#4F4F4F));
     box-shadow:inset 0 0 10px rgba(0,0,0,.4);
     -moz-box-shadow:inset 0 0 10px rgba(0,0,0,.4);
     -webkit-box-shadow:inset 0 0 10px rgba(0,0,0,.4);
