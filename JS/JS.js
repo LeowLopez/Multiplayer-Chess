@@ -76,26 +76,27 @@ function recebeuConvite(c) {
 
 			// avisar convite
 			alert("Você recebeu um convite!");
+
 			document.getElementById('convidar').style.visibility = 'hidden';
-			document.getElementById('stats').style.visibility = 'visible';
-			document.getElementById('xeque').style.visibility = 'visible';
-			document.getElementById('xeque').addEventListener("click", Xeque);
-	
-			// liberar o jogo
 			convidado = true;//convidado
 			giveParts('convidado');
 			EventClickLinks('addFirst');
 			document.getElementById('pessoa').innerHTML = "Convidado";
-		}
-		else if(data == "confirmation"){//confirmação do convidado, libera pra quem convidou
-			document.getElementById('pessoa').innerHTML = "Convidante";
-			giveParts('convidante');
-			EventClickLinks('addFirst');
+			document.getElementById('stats').style.visibility = 'visible';
 			document.getElementById('xeque').style.visibility = 'visible';
 			document.getElementById('xeque').addEventListener("click", Xeque);
-			document.getElementById('convidar').style.visibility = 'hidden';
-			document.getElementById('stats').style.visibility = 'visible';
+			//gameLife = setInterval(KingHealth, 2000);
+		}
+		else if(data == "confirmation"){//confirmação do convidado, libera pra quem convidou
 			convidado = false;//convidante
+			document.getElementById('convidar').style.visibility = 'hidden';
+			giveParts('convidante');
+			EventClickLinks('addFirst');
+			document.getElementById('pessoa').innerHTML = "Convidante";
+			document.getElementById('stats').style.visibility = 'visible';
+			document.getElementById('xeque').style.visibility = 'visible';
+			document.getElementById('xeque').addEventListener("click", Xeque);
+			//gameLife = setInterval(KingHealth, 2000);
 		}
 		/*else if(isNumber(data) == true){
 			//se for número, é para atualizar movimento
@@ -839,9 +840,9 @@ function Move(){
 			ClassBeforeXequeOther = "pretas";
 		} else ClassBeforeXequeOther = "brancas";
 
-		posOtherKing.setAttribute('class', "xequed");
+		OtherKing.setAttribute('class', "xequed");
 		
-		MsgXeque = "xxx"+posOtherKing.id;//"xxx" para ver quando é xeque e a posição do rei para o outro não precisar "procurar"
+		MsgXeque = "xxx"+OtherKing.id;//"xxx" para ver quando é xeque e a posição do rei para o outro não precisar "procurar"
 		conn = peer.connect(idc);
 		conn.on('open', function(){
 			conn.send(MsgXeque);//Mostrar xeque no outro
@@ -852,7 +853,7 @@ function Move(){
 
 		if(Xequed == 1){//Se desiste de dar xeque-mate (sei que é meio ilógico, mas se tentarem tenho que possibilitar)
 			Xequed = 0;//Senão, numa desistência dessa o rei oposto só volta à sua cor no movimento do outro player
-			posOtherKing.className = ClassBeforeXequeOther;//e isso pode soar como um bug
+			OtherKing.className = ClassBeforeXequeOther;//e isso pode soar como um bug
 		}
 
 		/*	Remoção de atributos do link que ficará vazio, sem peça.	*/
@@ -893,7 +894,9 @@ function Move(){
 			} else document.getElementById('vez').innerHTML = "do outro jogador.";
 		} else if(convidado == false){
 				document.getElementById('vez').innerHTML = "sua.";//Se movimentos for par, vez das brancas, vez do convidado.
-			} else document.getElementById('vez').innerHTML = "do outro jogador.";		
+			} else document.getElementById('vez').innerHTML = "do outro jogador.";
+
+	setTimeout(KingHealth, 100);
 	}
 }
 
@@ -901,7 +904,7 @@ function MoveOther(oldPosOther, newPosOther){
 	
 	if(Xequed == 1){//Toda vez que o rei oposto estiver em xeque, retira o xeque quando o oponente mover alguma peça
 		Xequed = 0;//pois espera-se que ele tente fugir, senão, é xeque-mate
-		posOtherKing.className = ClassBeforeXequeOther;//coloca a classe antiga do rei (pretas ou brancas)
+		OtherKing.className = ClassBeforeXequeOther;//coloca a classe antiga do rei (pretas ou brancas)
 
 		setTimeout(Xeque, 100);//Mas vai que ele quer um xeque-mate...
 		//Aguarda um décimo de segundo. Pois se o outro capturar a peça que está atacando, o Xeque vai considerar que a peça
@@ -944,6 +947,7 @@ function MoveOther(oldPosOther, newPosOther){
 	} else document.getElementById('vez').innerHTML = "do outro jogador.";
 
 	conn.close();
+	setTimeout(KingHealth, 100);
 }
 
 function Xeque(){
@@ -952,28 +956,70 @@ function Xeque(){
 	XequeClick = 1;
 	
 	if(convidado == true){//Se é brancas
-		var OtherKing = "Rei Preto";//rei oposto é o preto
-		allMy = document.querySelectorAll('.brancas');//seleciona todas as peças brancas (para testar se está atacando o rei)
-		allOther = document.querySelectorAll('.pretas');//seleciona todas as peças pretas (para procurar o rei oposto)
+		var nameOtherKing = "Rei Preto";//rei oposto é o preto
+		var allMy = document.querySelectorAll('.brancas');//seleciona todas as peças brancas (para testar se está atacando o rei)
+		var allOther = document.querySelectorAll('.pretas');//seleciona todas as peças pretas (para procurar o rei oposto)
 	}
 	else{
-		var OtherKing = "Rei Branco";//senão (se for pretas), rei oposto é o branco
-		allMy = document.querySelectorAll('.pretas');//seleciona todas as peças pretas (para testar se está atacando o rei)
-		allOther = document.querySelectorAll('.brancas');//seleciona todas as peças brancas (para procurar o rei oposo)
+		var nameOtherKing = "Rei Branco";//senão (se for pretas), rei oposto é o branco
+		var allMy = document.querySelectorAll('.pretas');//seleciona todas as peças pretas (para testar se está atacando o rei)
+		var allOther = document.querySelectorAll('.brancas');//seleciona todas as peças brancas (para procurar o rei oposo)
 	}
 
-	for(jxeque = 0, cacheArray = allOther.length; jxeque < cacheArray; jxeque++){//Percorre todas peças opostas
-		if(allOther[jxeque].title == OtherKing){//Quando achar o rei oposto
-			posOtherKing = allOther[jxeque];
-			for(ixeque = 0, cacheArray = allMy.length; ixeque < cacheArray; ixeque++){//Percorre todas as peças da classe
-				verifyPartMovement(allMy[ixeque], allOther[jxeque]);//verifica se está em posição de ataque ao rei
-				console.log(allMy[ixeque].id+" com "+posOtherKing.id);
+	for(var jxeque = 0, cacheArray = allOther.length; jxeque < cacheArray; jxeque++){//Percorre todas peças opostas
+		if(allOther[jxeque].title == nameOtherKing){//Quando achar o rei oposto
+			OtherKing = allOther[jxeque];
+			for(var ixeque = 0, cacheArray = allMy.length; ixeque < cacheArray; ixeque++){//Percorre todas as peças da classe
+				verifyPartMovement(allMy[ixeque], OtherKing);//verifica se está em posição de ataque ao rei
+				console.log(allMy[ixeque].id+" com "+OtherKing.id);
 			}
 			jxeque = allOther.length;//para o laço
 		}
 	}
 
 	XequeClick = 0;
+}
+
+function KingHealth(){
+
+	var myKingLife = 0, otherKingLife = 0;
+	
+	if(convidado == true){//Se é brancas
+		var myKingName = "Rei Branco", otherKingName = "Rei Preto";
+		var allMy = document.querySelectorAll('.brancas, .xequed');//seleciona todas as peças brancas
+		var allOther = document.querySelectorAll('.pretas, .xequed');//seleciona todas as peças pretas
+	}
+	else{//senão (se for pretas)
+		var myKingName = "Rei Preto", otherKingName = "Rei Branco";
+		var allMy = document.querySelectorAll('.pretas, .xequed');//seleciona todas as peças pretas
+		var allOther = document.querySelectorAll('.brancas, .xequed');//seleciona todas as peças brancas
+	}
+
+	////---- VERIFICA SE MEU REI ESTÁ VIVO
+	for(var xMate = 0, cacheArray = allMy.length; xMate < cacheArray; xMate++){
+		if(allMy[xMate].title == myKingName){
+			myKingLife = 1;//Rei vivo
+			xMate = cacheArray;//para o laço
+		}
+	}
+	////---- VERIFICA SE O REI ALHEIO ESTÁ VIVO
+	for(var xMate = 0, cacheArray = allOther.length; xMate < cacheArray; xMate++){
+		if(allOther[xMate].title == otherKingName){
+			otherKingLife = 1;
+			xMate = cacheArray;
+		}
+	}
+
+	if(myKingLife == 0){
+		EventClickLinks();//bloqueia peças
+		//clearInterval(gameLife);
+		console.log("XEQUE MATE: VOCÊ PERDEU, VAI JOGAR DAMA!!!");
+	}
+	else if(otherKingLife == 0){
+		EventClickLinks();//bloqueia peças
+		//clearInterval(gameLife);
+		console.log("XEQUE-MATE: VOCÊ VENCEU, É UM GRANDE ESTRATEGISTA!!!");
+	} else return true;//se ambos estão vivos, o jogo continua!
 }
 
 
