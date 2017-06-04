@@ -1013,12 +1013,12 @@ function KingHealth(){
 	if(myKingLife == 0){
 		EventClickLinks();//bloqueia peças
 		//clearInterval(gameLife);
-		console.log("XEQUE MATE: VOCÊ PERDEU, VAI JOGAR DAMA!!!");
+		alert("XEQUE MATE: VOCÊ PERDEU, VAI JOGAR DAMA!!!");
 	}
 	else if(otherKingLife == 0){
 		EventClickLinks();//bloqueia peças
 		//clearInterval(gameLife);
-		console.log("XEQUE-MATE: VOCÊ VENCEU, É UM GRANDE ESTRATEGISTA!!!");
+		alert("XEQUE-MATE: VOCÊ VENCEU, É UM GRANDE ESTRATEGISTA!!!");
 	} else return true;//se ambos estão vivos, o jogo continua!
 }
 
