@@ -14,7 +14,7 @@ function MultiplayerInit(){
 	// Variável para definir quem é o jogador. O convidante ou convidado. Caso for = -1, não está jogando
 	convidado = -1, convidante = 1/*para distribuir somente quando for true*/;
 	XequeClick = 0/*quando dá o xeque*/, Xequed = 0/*se o rei oposto está em xeque*/, Movements = 0;//Calcular movimentos.
-	MyKing = 0, newClassLink = ""/*, classLinkClicked*/;
+	MyKing = 0, newClassLink = "", promoting = 0;
 	appid = 'gfr5dkuqgyyl23xr';
 	// Fazer a conexão 
 	peer = new Peer({
@@ -116,6 +116,10 @@ function recebeuConvite(c) {
 				} else ClassBeforeXeque = "pretas";
 				MyKing.setAttribute('class', "xequed");
 				console.log("Rei sofreu Xeque "+Oldid+""+Newid);
+			}
+			else if(Oldid == "pro"){//se for ação de promoção do outro
+				promoting = 1;//verificar no MoveOther()
+				promotelinkClicked = document.getElementById(Newid);//peça à que será promovido o peão
 			}
 			else{
 				//console.log(Oldid+""+Newid);
@@ -416,18 +420,18 @@ function verifyPartMovement(oldPos, newPos){
 		partMovPermited = new Array((+i-1)+""+j, (+i-2)+""+j, (+i-1)+""+(+j-1), (+i-1)+""+(+j+1));
 		//expressão que descreve o movimento permitido, movimento da primeira jogada, e os dois possíveis de captura, respectivamente
 	}
-	else if((titlepart == 'Torre Branca 1') || (titlepart == 'Torre Branca 2')
-	 	|| (titlepart == 'Torre Preta 1') || (titlepart == 'Torre Preta 2')){//Testa se é Torre.
+	else if((titlepart == 'Torre Branca 1') || (titlepart == 'Torre Branca 2') || (titlepart == 'Torre brancas')
+	 	|| (titlepart == 'Torre Preta 1') || (titlepart == 'Torre Preta 2') || (titlepart == 'Torre pretas')){//Testa se é Torre.
 		part = 'torre';
 		partMovPermited = new Array(i+""+k, l+""+j);
 	}
-	else if((titlepart == 'Bispo Branco 1') || (titlepart == 'Bispo Branco 2')
-	 	|| (titlepart == 'Bispo Preto 1') || (titlepart == 'Bispo Preto 2')){//Testa se é Bispo.
+	else if((titlepart == 'Bispo Branco 1') || (titlepart == 'Bispo Branco 2') || (titlepart == 'Bispo brancas')
+	 	|| (titlepart == 'Bispo Preto 1') || (titlepart == 'Bispo Preto 2') || (titlepart == 'Bispo pretas')){//Testa se é Bispo.
 		part = 'bispo';
 		partMovPermited = new Array(l+""+((+j)+(+l)-(+i)), l+""+((+j)+(+i)-(+l)));
 	}
-	else if((titlepart == 'Cavalo Branco 1') || (titlepart == 'Cavalo Branco 2')
-	 	|| (titlepart == 'Cavalo Preto 1') || (titlepart == 'Cavalo Preto 2')){//Testa se é Cavalo.
+	else if((titlepart == 'Cavalo Branco 1') || (titlepart == 'Cavalo Branco 2') || (titlepart == 'Cavalo brancas')
+	 	|| (titlepart == 'Cavalo Preto 1') || (titlepart == 'Cavalo Preto 2') || (titlepart == 'Cavalo pretas')){//Testa se é Cavalo.
 		part = 'cavalo';
 		partMovPermited = new Array((+i+1)+""+(+j+2), (+i+1)+""+(+j-2), (+i+2)+""+(+j+1),
 		(+i+2)+""+(+j-1), (+i-1)+""+(+j+2), (+i-1)+""+(+j-2), (+i-2)+""+(+j+1), (+i-2)+""+(+j-1));
@@ -493,19 +497,26 @@ function verifyPartMovement(oldPos, newPos){
 					}
 					else{
 						if(XequeClick == 1) return true;
-						if(Xf == 7) Promotion();//Se chegar na última linha, ocorre a promoção do Peão						}
-						//MovementPP[n-1]++;
-						Move();
-						console.log(titlepart+" moveu");
+						if(Xf == 7){
+							Promotion();//Se chegar na última linha, ocorre a promoção do Peão						}
+						}
+						else{//MovementPP[n-1]++;
+							Move();
+							console.log(titlepart+" moveu");
+						}
 					}
 				}
 				else if(newClassLink != 'vazias'){//Já foi verificado se era mesma classe no WhenCLickCell(), então se não for vazias, será captura
 					if((newPosCell == partMovPermited[2]) || (newPosCell == partMovPermited[3])){//se é 1 casa para alguma diagonal
 						if(XequeClick == 1) return Move();
-						if(Xf == 7) Promotion();//Se chegar na última linha, ocorre a promoção do Peão
-						console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-						//MovementPP[n-1]++;
-						Move();
+						if(Xf == 7){
+							Promotion();//Se chegar na última linha, ocorre a promoção do Peão
+						}
+						else{
+							console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
+							//MovementPP[n-1]++;
+							Move();
+						}
 					}
 					else{
 						if(XequeClick == 1) return true;
@@ -565,19 +576,27 @@ function verifyPartMovement(oldPos, newPos){
 					}
 					else{
 						if(XequeClick == 1) return true;
-						if(Xf == 0) Promotion();//Se chegar na última linha, ocorre a promoção do Peão
-						//MovementPB[n-1]++;
-						Move();
-						console.log(titlepart+" moveu");
+						if(Xf == 0){
+							Promotion();//Se chegar na última linha, ocorre a promoção do Peão
+						}
+						else{
+							//MovementPB[n-1]++;
+							Move();
+							console.log(titlepart+" moveu");
+						}
 					}
 				}
 				else if(newClassLink != 'vazias'){//Já foi verificado se era mesma classe no WhenCLickCell(), então se não for vazias, será captura
 					if((newPosCell == partMovPermited[2]) || (newPosCell == partMovPermited[3])){//se é 1 casa para alguma diagonal
 						if(XequeClick == 1) return Move();
-						if(Xf == 0) Promotion();//Se chegar na última linha, ocorre a promoção do Peão
-						console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-						//MovementPB[n-1]++;
-						Move();
+						if(Xf == 0){
+							Promotion();//Se chegar na última linha, ocorre a promoção do Peão
+						}
+						else{
+							console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
+							//MovementPB[n-1]++;
+							Move();
+						}
 					}
 					else{
 						if(XequeClick == 1) return true;
@@ -643,9 +662,28 @@ function verifyPartMovement(oldPos, newPos){
 
 function Promotion(){
 	document.getElementById("promotePart").style.visibility = "visible";
-	//document.getElementById("promotePart").addEventListener("click", Promover);
-	document.getElementById("promotePart").innerHTML = "<a class='angels' href='#'>&#9816;</a><a class='angels' href='#'>&#9816;</a><a class='angels' href='#'>&#9816;</a><a class='angels' href='#'>&#9816;</a>";
-	console.log("Promoção ocorreu!");
+	for(var p = 1; p < 5; p++){//adicina Promote() nos 4 links de peça à ser promovida
+		document.getElementById("p8"+p).addEventListener("click", Promote);
+	}
+}
+
+function Promote(){
+	var id = this.id;
+	promotelinkClicked = document.getElementById(id);//Peça a que se promoverá o peão
+	
+	partPromoted = "pro"+id;//
+	conn = peer.connect(idc);
+	conn.on('open', function(){
+		conn.send(partPromoted);//envia para o outro a nova peça à que será promovido o peão
+	});
+	
+	titleLinkClicked = promotelinkClicked.title+" "+classLinkClicked;//Novo título + classe + número peão, caso haja mais promoções, diferencia
+	partLinkClicked = promotelinkClicked.innerHTML;//Nova peça
+	console.log(linkClicked.title+" foi promovido a "+titleLinkClicked+"!");
+
+	document.getElementById("promotePart").style.visibility = "hidden";
+	document.getElementById("promotePart").removeEventListener("click", Promote);
+	setTimeout(Move, 1000);
 }
 
 function VerifyJumped(){
@@ -935,9 +973,18 @@ function MoveOther(oldPosOther, newPosOther){
 	NewLink = document.getElementById(newPosOther);//link para onde o outro moveu
 
 	classLinkClickedOther = OldLink.className;//salva classe antiga do outro
-	titleLinkClickedOther = OldLink.title;//salva título da peça 
-	partLinkClickedOther = OldLink.innerHTML;//e a peça, os três são passados para a nova posição
 
+	if(promoting == 1){//Se o outro está se promovendo
+		//var n = OldLink.title.slice(-1);//número do peão se promovendo
+		titleLinkClickedOther = promotelinkClicked.title+" "+classLinkClickedOther;//Novo título + classe
+		partLinkClickedOther = promotelinkClicked.innerHTML;//Nova peça
+		console.log(OldLink.title+" foi promovido a "+titleLinkClickedOther+"!");
+		promoting = 0;//promoteLinkClicked definido em recebeConvite()
+	}
+	else{
+		titleLinkClickedOther = OldLink.title;//salva título da peça 
+		partLinkClickedOther = OldLink.innerHTML;//e a peça, os três são passados para a nova posição
+	}
 
 	if(NewLink.className != 'vazias'){
 		console.log(NewLink.title+" sofreu captura de "+titleLinkClickedOther+"!");//Movimento de captura
