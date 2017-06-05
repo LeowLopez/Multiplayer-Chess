@@ -1,5 +1,4 @@
  Multiplayer Chess v1.0 - Beta version is ready!
-
 [x] Movement limits for all pieces
 [x] Two step of pawns
 [x] Check/checkmate
