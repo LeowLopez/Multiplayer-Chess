@@ -21,7 +21,7 @@ function MultiplayerInit(){
 	key:  appid,
 	debug: 0,
 	config: {'iceServers': [
-		{ url: 'stun:stun.l.google.com:19302' }
+		{ urls: 'stun:stun.l.google.com:19302' }
 	]} 
 	});
 	// Ao conectar, registrar o ID do jogador conectado
@@ -71,21 +71,26 @@ function recebeuConvite(c) {
 			// caso ele já for convidado, não fazer nada			
 			if(convidado != -1) return false;
 
-			// registrar quem convidou
-			idc = (c.peer);
+			//	if(confirm("Você recebeu um convite")){//se apertar em confirmar
+				
+				// registrar quem convidou
+				idc = (c.peer);
 
-			// avisar convite
-			alert("Você recebeu um convite!");
+				// avisar convite
+				//alert("Você recebeu um convite!");
 
-			document.getElementById('convidar').style.visibility = 'hidden';
-			convidado = true;//convidado
-			giveParts('convidado');
-			EventClickLinks('addFirst');
-			document.getElementById('pessoa').innerHTML = "Convidado";
-			document.getElementById('stats').style.visibility = 'visible';
-			document.getElementById('xeque').style.visibility = 'visible';
-			document.getElementById('xeque').addEventListener("click", Xeque);
-			//gameLife = setInterval(KingHealth, 2000);
+				document.getElementById('convidar').style.visibility = 'hidden';
+				convidado = true;//convidado
+				giveParts('convidado');
+				EventClickLinks('addFirst');
+				document.getElementById('pessoa').innerHTML = "Convidado";
+				document.getElementById('stats').style.visibility = 'visible';
+				document.getElementById('xeque').style.visibility = 'visible';
+				document.getElementById('xeque').addEventListener("click", Xeque);
+				//gameLife = setInterval(KingHealth, 2000);
+			//}
+			//else return false;//se clicar em cancelar
+
 		}
 		else if(data == "confirmation"){//confirmação do convidado, libera pra quem convidou
 			convidado = false;//convidante
