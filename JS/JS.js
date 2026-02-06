@@ -128,6 +128,8 @@ function recebeuConvite(c) {
 
 				// avisar convite
 				//alert("Você recebeu um convite!");
+				// avisar convite
+				//alert("Você recebeu um convite!");
 
 				document.getElementById('convidar').style.visibility = 'hidden';
 				convidado = true;//convidado
