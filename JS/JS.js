@@ -1,13 +1,17 @@
 /*
-~~~ Convidado: 	Peças brancas 
-~~~ Convidante: Peças pretas 
+~~~ Convidado: 	Peças brancas /white pieces
+~~~ Convidante: Peças pretas /black pieces
 */
 
 /* ---- QUANDO CARREGAR A PÁGINA ---- */
 window.addEventListener("load", function() {
-	createParts();
+	createPieces();
 	MultiplayerInit();
 	document.getElementById('play').addEventListener("click", jogarCom);
+	var copyButton = document.getElementById('copy-id');
+	if(copyButton){
+		copyButton.addEventListener("click", copyMyId);
+	}
 });
 
 function MultiplayerInit(){
@@ -16,26 +20,67 @@ function MultiplayerInit(){
 	XequeClick = 0/*quando dá o xeque*/, Xequed = 0/*se o rei oposto está em xeque*/, Movements = 0;//Calcular movimentos.
 	MyKing = 0, newClassLink = "", promoting = 0;
 	appid = 'gfr5dkuqgyyl23xr';
-	// Fazer a conexão 
-	peer = new Peer({
-	key:  appid,
-	debug: 0,
-	config: {'iceServers': [
-		{ url: 'stun:stun.l.google.com:19302' }
-	]} 
-	});
+	// Fazer a conex?o 
+	var iceServers = (window.ICE_SERVERS && window.ICE_SERVERS.length) ? window.ICE_SERVERS : [
+		{ urls: 'stun:stun.l.google.com:19302' }
+	];
+	var peerOptions = {
+		//key:  appid,
+		debug: 0,
+		config: {'iceServers': iceServers, 'sdpSemantics': 'unified-plan' } 
+	};
+	// Para rodar 100% independente, configure um PeerServer local via window.PEER_CONFIG antes de carregar este arquivo.
+	if(window.PEER_CONFIG && typeof window.PEER_CONFIG === "object"){
+		for(var opt in window.PEER_CONFIG){
+			peerOptions[opt] = window.PEER_CONFIG[opt];
+		}
+	}
+	peer = new Peer(peerOptions);
 	// Ao conectar, registrar o ID do jogador conectado
 	peer.on('open', function(id) {
   	document.getElementById('seuid').innerHTML = id;
-	});
+	updateConnectionStatus("online");
+});
+peer.on('error', function(err){
+	console.log(err);
+	updateConnectionStatus("erro");
+});
+peer.on('disconnected', function(){
+	updateConnectionStatus("desconectado");
+});
 
 	// caso Receber alguma conexão, chamar função recebeuConvite
 	peer.on('connection', function(conn) {
-	recebeuConvite(conn); 
+		recebeuConvite(conn); 
 	});
 
 	//setInterval( function () { outroMoveu(); }, 3000 );//GameLife
 }	
+
+function updateConnectionStatus(status){
+	var statusEl = document.getElementById('conn-status');
+	if(!statusEl) return false;
+	statusEl.innerHTML = status;
+	return true;
+}
+
+function copyMyId(){
+	var idEl = document.getElementById('seuid');
+	if(!idEl) return false;
+	var value = idEl.textContent || idEl.innerText;
+	if(!value) return false;
+	if(navigator.clipboard && navigator.clipboard.writeText){
+		navigator.clipboard.writeText(value);
+	} else{
+		var tempInput = document.createElement('input');
+		tempInput.value = value;
+		document.body.appendChild(tempInput);
+		tempInput.select();
+		document.execCommand('copy');
+		document.body.removeChild(tempInput);
+	}
+	return true;
+}
 
 // Ao clicar no link, abrir caixa para convite de jogador
 function jogarCom() {
@@ -45,9 +90,12 @@ function jogarCom() {
 
 	// abrir caixa
 	var jogarid = prompt("Digite o ID da pessoa com quem deseja jogar:");
+	if(!jogarid) return false;
 	
 	// idc guarda o id com quem está jogando
 	idc = jogarid;
+	var opponentEl = document.getElementById('opponent-id');
+	if(opponentEl) opponentEl.innerHTML = jogarid;
 
 	// enviar o convite para o id digitado
 	conn = peer.connect(jogarid);
@@ -71,26 +119,33 @@ function recebeuConvite(c) {
 			// caso ele já for convidado, não fazer nada			
 			if(convidado != -1) return false;
 
-			// registrar quem convidou
-			idc = (c.peer);
+			//	if(confirm("Você recebeu um convite")){//se apertar em confirmar
+				
+				// registrar quem convidou
+				idc = (c.peer);
+				var opponentEl = document.getElementById('opponent-id');
+				if(opponentEl) opponentEl.innerHTML = idc;
 
-			// avisar convite
-			alert("Você recebeu um convite!");
+				// avisar convite
+				//alert("Você recebeu um convite!");
 
-			document.getElementById('convidar').style.visibility = 'hidden';
-			convidado = true;//convidado
-			giveParts('convidado');
-			EventClickLinks('addFirst');
-			document.getElementById('pessoa').innerHTML = "Convidado";
-			document.getElementById('stats').style.visibility = 'visible';
-			document.getElementById('xeque').style.visibility = 'visible';
-			document.getElementById('xeque').addEventListener("click", Xeque);
-			//gameLife = setInterval(KingHealth, 2000);
+				document.getElementById('convidar').style.visibility = 'hidden';
+				convidado = true;//convidado
+				givePieces('convidado');
+				EventClickLinks('addFirst');
+				document.getElementById('pessoa').innerHTML = "Convidado";
+				document.getElementById('stats').style.visibility = 'visible';
+				document.getElementById('xeque').style.visibility = 'visible';
+				document.getElementById('xeque').addEventListener("click", Xeque);
+				//gameLife = setInterval(KingHealth, 2000);
+			//}
+			//else return false;//se clicar em cancelar
+
 		}
 		else if(data == "confirmation"){//confirmação do convidado, libera pra quem convidou
 			convidado = false;//convidante
 			document.getElementById('convidar').style.visibility = 'hidden';
-			giveParts('convidante');
+			givePieces('convidante');
 			EventClickLinks('addFirst');
 			document.getElementById('pessoa').innerHTML = "Convidante";
 			document.getElementById('stats').style.visibility = 'visible';
@@ -153,7 +208,7 @@ function recebeuConvite(c) {
 		}
 		// Primeira atualização do convidante
 		else if((convidado == false) && (convidante == 1)){
-			giveParts('convidante');
+			givePieces('convidante');
 			EventClickLinks('addFirst');
 			document.getElementById('convidar').style.visibility = 'hidden';
 			document.getElementById('stats').style.visibility = 'visible';
@@ -175,7 +230,7 @@ function recebeuConvite(c) {
 
 
 /* ---- CRIAÇÂO DAS VARIÁVEIS E ATRIBUIÇÃO DOS UNICODES DE CADA PEÇA (função chamada quando carregar a página) ---- */
-function createParts(){
+function createPieces(){
 	pBranco = new Array(8);//peões brancos
 	pPreto = new Array(8);//peões pretos
 	titlePB = new Array(8);//atributo title dos peões brancos
@@ -205,7 +260,7 @@ function createParts(){
 	rainhaBranca = "&#9819;";//"&#9813;";
 	rainhaPreta = "&#9819;";
 
-	/*movementPart = new function(part){
+	/*movementPiece = new function(piece){
 		this.id... Salva numa array
 		manda pelo conn.send(), getelementbyid(array[id]).atributos
 	}*/
@@ -214,7 +269,7 @@ function createParts(){
 
 
 /* ---- CRIAÇÃO DO TABULEIRO E POSICIONAMENTO INICIAL DAS PEÇAS NO MESMO ---- */
-function giveParts(people){
+function givePieces(people){
 
 	if(people == 'convidado'){
 
@@ -279,7 +334,7 @@ function giveParts(people){
 
 	/* ----------------------------- Posicionamento dos Reis e rainhas ----------------------------*/
 	document.getElementById("03").innerHTML = "<a title='Rainha Preta' id='p03' href='#' class='pretas'>"+rainhaPreta+"</a>";
-	document.getElementById("04").innerHTML = "<a title='Rei Preto' id='p04' href='#' class='pretas'>"+reiPreto;+"</a>";
+	document.getElementById("04").innerHTML = "<a title='Rei Preto' id='p04' href='#' class='pretas'>"+reiPreto+"</a>";
 	document.getElementById("73").innerHTML = "<a title='Rainha Branca' id='p73' href='#' class='brancas'>"+rainhaBranca+"</a>";
 	document.getElementById("74").innerHTML = "<a title='Rei Branco' id='p74' href='#' class='brancas'>"+reiBranco+"</a>";
 
@@ -362,7 +417,7 @@ function whenClickLink(){
 	else{
 		titleLinkClicked = linkClicked.title;//Salva o nome da peça.
 		linkClicked.setAttribute('class','clicked');//Seta a classe do link clicado para "clicked", definido no CSS para ficar laranja.
-		partLinkClicked = linkClicked.innerHTML;//Clicamos em um link, agora pegamos seu UNICODE[peça];
+		pieceLinkClicked = linkClicked.innerHTML;//Clicamos em um link, agora pegamos seu UNICODE[peça];
 		EventClickLinks();//remove evento 'onCLick' dos links para não mover sem ser selecionada.
 		setTimeout(EventClickCells, 100);//Aguarda um décimo de segundo para adicionar o 'onCLick' nas células, depois de clicar no link...
 		//... Senão será entendido que o clique do link será o mesmo da célula.
@@ -387,12 +442,12 @@ function whenClickCell(){
 	}//											pois a jogada continua com a peça que já está selecionada.
 	else{
 		//Aqui realiza o movimento da primeira peça clicada para o novo local.	
-		verifyPartMovement(linkClicked, newLink);//função responsável pela verificação das peças e determinar seu movimento.
+		verifyPieceMovement(linkClicked, newLink);//função responsável pela verificação das peças e determinar seu movimento.
 	}
 }
 
 /* ---- VERIFICA A PEÇA E MOVIMENTO ---- */
-function verifyPartMovement(oldPos, newPos){
+function verifyPieceMovement(oldPos, newPos){
 
 	/* Por convenção, nomeei todos os links (peças) com a constante "p" (de peça) seguido de 2 números
 	que são referentes às suas intersecções de Linhas e Colunas. Então agora pego o id [p(eça)L(inha)C(oluna)],
@@ -405,78 +460,78 @@ function verifyPartMovement(oldPos, newPos){
 	newPosCell = l+""+k;//Posição para onde será movida a peça.
 
 
-	titlepart = oldPos.title;//título da peça que será movida.
-	part = "";//guardar um nome em comum para grupos de peças que possuem o mesmo movimento.
+	titlepiece = oldPos.title;//título da peça que será movida.
+	piece = "";//guardar um nome em comum para grupos de peças que possuem o mesmo movimento.
 
-	if(titlePP.indexOf(titlepart) !== -1){//Testa se é um dos títulos na array "titlePP".
-		part = 'peao preto';
+	if(titlePP.indexOf(titlepiece) !== -1){//Testa se é um dos títulos na array "titlePP".
+		piece = 'peao preto';
 		n = oldPos.title.slice(-1);//salva número do Peão (1 á 8)
-		partMovPermited = new Array((+i+1)+""+j, (+i+2)+""+j, (+i+1)+""+(+j-1), (+i+1)+""+(+j+1));
+		pieceMovPermited = new Array((+i+1)+""+j, (+i+2)+""+j, (+i+1)+""+(+j-1), (+i+1)+""+(+j+1));
 		//expressão que descreve o movimento permitido, movimento da primeira jogada, e os dois possíveis de captura, respectivamente
 	}
-	else if(titlePB.indexOf(titlepart) !== -1){//Agora se é um dos títulos da array "titlePB".
-		part = 'peao branco';
+	else if(titlePB.indexOf(titlepiece) !== -1){//Agora se é um dos títulos da array "titlePB".
+		piece = 'peao branco';
 		n = oldPos.title.slice(-1);//salva número do peão (1 á 8)
-		partMovPermited = new Array((+i-1)+""+j, (+i-2)+""+j, (+i-1)+""+(+j-1), (+i-1)+""+(+j+1));
+		pieceMovPermited = new Array((+i-1)+""+j, (+i-2)+""+j, (+i-1)+""+(+j-1), (+i-1)+""+(+j+1));
 		//expressão que descreve o movimento permitido, movimento da primeira jogada, e os dois possíveis de captura, respectivamente
 	}
-	else if((titlepart == 'Torre Branca 1') || (titlepart == 'Torre Branca 2') || (titlepart == 'Torre brancas')
-	 	|| (titlepart == 'Torre Preta 1') || (titlepart == 'Torre Preta 2') || (titlepart == 'Torre pretas')){//Testa se é Torre.
-		part = 'torre';
-		partMovPermited = new Array(i+""+k, l+""+j);
+	else if((titlepiece == 'Torre Branca 1') || (titlepiece == 'Torre Branca 2') || (titlepiece == 'Torre brancas')
+	 	|| (titlepiece == 'Torre Preta 1') || (titlepiece == 'Torre Preta 2') || (titlepiece == 'Torre pretas')){//Testa se é Torre.
+		piece = 'torre';
+		pieceMovPermited = new Array(i+""+k, l+""+j);
 	}
-	else if((titlepart == 'Bispo Branco 1') || (titlepart == 'Bispo Branco 2') || (titlepart == 'Bispo brancas')
-	 	|| (titlepart == 'Bispo Preto 1') || (titlepart == 'Bispo Preto 2') || (titlepart == 'Bispo pretas')){//Testa se é Bispo.
-		part = 'bispo';
-		partMovPermited = new Array(l+""+((+j)+(+l)-(+i)), l+""+((+j)+(+i)-(+l)));
+	else if((titlepiece == 'Bispo Branco 1') || (titlepiece == 'Bispo Branco 2') || (titlepiece == 'Bispo brancas')
+	 	|| (titlepiece == 'Bispo Preto 1') || (titlepiece == 'Bispo Preto 2') || (titlepiece == 'Bispo pretas')){//Testa se é Bispo.
+		piece = 'bispo';
+		pieceMovPermited = new Array(l+""+((+j)+(+l)-(+i)), l+""+((+j)+(+i)-(+l)));
 	}
-	else if((titlepart == 'Cavalo Branco 1') || (titlepart == 'Cavalo Branco 2') || (titlepart == 'Cavalo brancas')
-	 	|| (titlepart == 'Cavalo Preto 1') || (titlepart == 'Cavalo Preto 2') || (titlepart == 'Cavalo pretas')){//Testa se é Cavalo.
-		part = 'cavalo';
-		partMovPermited = new Array((+i+1)+""+(+j+2), (+i+1)+""+(+j-2), (+i+2)+""+(+j+1),
+	else if((titlepiece == 'Cavalo Branco 1') || (titlepiece == 'Cavalo Branco 2') || (titlepiece == 'Cavalo brancas')
+	 	|| (titlepiece == 'Cavalo Preto 1') || (titlepiece == 'Cavalo Preto 2') || (titlepiece == 'Cavalo pretas')){//Testa se é Cavalo.
+		piece = 'cavalo';
+		pieceMovPermited = new Array((+i+1)+""+(+j+2), (+i+1)+""+(+j-2), (+i+2)+""+(+j+1),
 		(+i+2)+""+(+j-1), (+i-1)+""+(+j+2), (+i-1)+""+(+j-2), (+i-2)+""+(+j+1), (+i-2)+""+(+j-1));
 	}
 	else{
-		part = 'coroa';
-		if((titlepart == 'Rei Preto') || (titlepart == 'Rei Branco')){//Se Reis
-			partMovPermited = new Array(i+""+(+j+1), i+""+(+j-1), (+i+1)+""+j, (+i-1)+""+j,
+		piece = 'coroa';
+		if((titlepiece == 'Rei Preto') || (titlepiece == 'Rei Branco')){//Se Reis
+			pieceMovPermited = new Array(i+""+(+j+1), i+""+(+j-1), (+i+1)+""+j, (+i-1)+""+j,
 			(+i+1)+""+(+j+1), (+i+1)+""+(+j-1), (+i-1)+""+(+j+1), (+i-1)+""+(+j-1));
 		}
 		else{//Se Rainhas
-			partMovPermited = new Array(i+""+k, l+""+j, l+""+((+j)+(+l)-(+i)), l+""+((+j)+(+i)-(+l)));
+			pieceMovPermited = new Array(i+""+k, l+""+j, l+""+((+j)+(+l)-(+i)), l+""+((+j)+(+i)-(+l)));
 		}
 	}
 
 	Xi = +i, Yi = +j;//atribuindo valor de LC (XY inicial)
 	Xf = +l, Yf = +k;//e transformando string em número (XY final)
 	
-	switch(part){
+	switch(piece){
 
 		//////////////////////////////////////// Se for um peão preto;
 		case 'peao preto':
 			if(MovementPP[+n-1] < 1){//se for a primeira jogada de cada peão preto
-				if((newPosCell == partMovPermited[0]) || (newPosCell == partMovPermited[1])){//se é 1 ou 2 casas na vertical
-					var jumped = document.getElementById('p'+partMovPermited[0]).className;//classe da peça pulada, se houver 
+				if((newPosCell == pieceMovPermited[0]) || (newPosCell == pieceMovPermited[1])){//se é 1 ou 2 casas na vertical
+					var jumped = document.getElementById('p'+pieceMovPermited[0]).className;//classe da peça pulada, se houver 
 					if(newClassLink != 'vazias'){
 						if(XequeClick == 1) return true;
 						alert("Você não tem culhão para atacar pela frente, só pela diagonal!!!");
 					}
-					else if((newPosCell == partMovPermited[1]) && (jumped != 'vazias')){
+					else if((newPosCell == pieceMovPermited[1]) && (jumped != 'vazias')){
 						if(XequeClick == 1) return true;
 						alert("Você até parece um animal, mas não é um cavalo!!!");
 					}
 					else{
 						if(XequeClick == 1) return true;
 						MovementPP[n-1]++;//contador de movimento do peão n
-						console.log(titlepart+" moveu");
+						console.log(titlepiece+" moveu");
 						Move();
 					}
 				}
 				else if(newClassLink != 'vazias'){//Já foi verificado se era mesma classe no WhenCLickCell(), então se não for vazias, será captura
-					if((newPosCell == partMovPermited[2]) || (newPosCell == partMovPermited[3])){//se é 1 casa para alguma diagonal
+					if((newPosCell == pieceMovPermited[2]) || (newPosCell == pieceMovPermited[3])){//se é 1 casa para alguma diagonal
 						if(XequeClick == 1) return Move();
 						MovementPP[n-1]++;//contador de movimento do peão n
-						console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
+						console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
 						Move();
 					}
 					else{
@@ -490,7 +545,7 @@ function verifyPartMovement(oldPos, newPos){
 				}
 			}
 			else{//Se não for mais a primeira jogada
-				if(newPosCell == partMovPermited[0]){//se é 1 casa na vertical
+				if(newPosCell == pieceMovPermited[0]){//se é 1 casa na vertical
 					if(newClassLink != 'vazias'){
 						if(XequeClick == 1) return true;
 						alert("Você não tem culhão para atacar pela frente, só pela diagonal!!!");
@@ -502,18 +557,18 @@ function verifyPartMovement(oldPos, newPos){
 						}
 						else{//MovementPP[n-1]++;
 							Move();
-							console.log(titlepart+" moveu");
+							console.log(titlepiece+" moveu");
 						}
 					}
 				}
 				else if(newClassLink != 'vazias'){//Já foi verificado se era mesma classe no WhenCLickCell(), então se não for vazias, será captura
-					if((newPosCell == partMovPermited[2]) || (newPosCell == partMovPermited[3])){//se é 1 casa para alguma diagonal
+					if((newPosCell == pieceMovPermited[2]) || (newPosCell == pieceMovPermited[3])){//se é 1 casa para alguma diagonal
 						if(XequeClick == 1) return Move();
 						if(Xf == 7){
 							Promotion();//Se chegar na última linha, ocorre a promoção do Peão
 						}
 						else{
-							console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
+							console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
 							//MovementPP[n-1]++;
 							Move();
 						}
@@ -534,13 +589,13 @@ function verifyPartMovement(oldPos, newPos){
 		//////////////////////////////////////// Se for um peão branco;
 		case 'peao branco':
 			if(MovementPB[+n-1] < 1){//se for a primeira jogada de cada peão branco
-				if((newPosCell == partMovPermited[0]) || (newPosCell == partMovPermited[1])){//se é 1 ou 2 casas na vertical
-					var jumped = document.getElementById('p'+partMovPermited[0]).className;//classe da peça pulada, se houver 
+				if((newPosCell == pieceMovPermited[0]) || (newPosCell == pieceMovPermited[1])){//se é 1 ou 2 casas na vertical
+					var jumped = document.getElementById('p'+pieceMovPermited[0]).className;//classe da peça pulada, se houver 
 					if(newClassLink != 'vazias'){
 						if(XequeClick == 1) return true;
 						alert("Você não tem culhão para atacar pela frente, só pela diagonal!!!");
 					}
-					else if((newPosCell == partMovPermited[1]) && (jumped != 'vazias')){
+					else if((newPosCell == pieceMovPermited[1]) && (jumped != 'vazias')){
 						if(XequeClick == 1) return true;
 						alert("Você até parece um animal, mas não é um cavalo!!!");
 					}
@@ -548,14 +603,14 @@ function verifyPartMovement(oldPos, newPos){
 						if(XequeClick == 1) return true;
 						Move();
 						MovementPB[n-1]++;//contador de movimento do peão n
-						console.log(titlepart+" moveu");
+						console.log(titlepiece+" moveu");
 					}
 				}
 				else if(newClassLink != 'vazias'){//Já foi verificado se era mesma classe no WhenCLickCell(), então se não for vazias, será captura
-					if((newPosCell == partMovPermited[2]) || (newPosCell == partMovPermited[3])){//se é 1 casa para alguma diagonal
+					if((newPosCell == pieceMovPermited[2]) || (newPosCell == pieceMovPermited[3])){//se é 1 casa para alguma diagonal
 						if(XequeClick == 1) return Move();
 						MovementPB[n-1]++;//contador de movimento do peão n
-						console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
+						console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
 						Move();//Captura
 					}
 					else{
@@ -569,7 +624,7 @@ function verifyPartMovement(oldPos, newPos){
 				}
 			}
 			else{//Se não for mais a primeira jogada
-				if(newPosCell == partMovPermited[0]){//se é 1 casa na vertical
+				if(newPosCell == pieceMovPermited[0]){//se é 1 casa na vertical
 					if(newClassLink != 'vazias'){
 						if(XequeClick == 1) return true;
 						alert("Você não tem culhão para atacar pela frente, só pela diagonal!!!");
@@ -582,18 +637,18 @@ function verifyPartMovement(oldPos, newPos){
 						else{
 							//MovementPB[n-1]++;
 							Move();
-							console.log(titlepart+" moveu");
+							console.log(titlepiece+" moveu");
 						}
 					}
 				}
 				else if(newClassLink != 'vazias'){//Já foi verificado se era mesma classe no WhenCLickCell(), então se não for vazias, será captura
-					if((newPosCell == partMovPermited[2]) || (newPosCell == partMovPermited[3])){//se é 1 casa para alguma diagonal
+					if((newPosCell == pieceMovPermited[2]) || (newPosCell == pieceMovPermited[3])){//se é 1 casa para alguma diagonal
 						if(XequeClick == 1) return Move();
 						if(Xf == 0){
 							Promotion();//Se chegar na última linha, ocorre a promoção do Peão
 						}
 						else{
-							console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
+							console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
 							//MovementPB[n-1]++;
 							Move();
 						}
@@ -612,7 +667,7 @@ function verifyPartMovement(oldPos, newPos){
 
 		//////////////////////////////////////// Se for uma torre;
 		case 'torre':
-			if(partMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
+			if(pieceMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
 				VerifyJumped();
 			} else{
 				if(XequeClick == 1) return true;
@@ -622,7 +677,7 @@ function verifyPartMovement(oldPos, newPos){
 
 		//////////////////////////////////////// Se for um bispo;	
 		case 'bispo':
-			if(partMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
+			if(pieceMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
 				VerifyJumped();
 			} else{
 				if(XequeClick == 1) return true;
@@ -632,11 +687,11 @@ function verifyPartMovement(oldPos, newPos){
 
 		//////////////////////////////////////// Se for um cavalo;
 		case 'cavalo':
-			if(partMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
+			if(pieceMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
 				if(newClassLink != 'vazias'){
 					if(XequeClick == 1) return Move();
-					console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-				} else console.log(titlepart+" moveu");
+					console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+				} else console.log(titlepiece+" moveu");
 				Move();
 			} else{
 				if(XequeClick == 1) return true;
@@ -646,7 +701,7 @@ function verifyPartMovement(oldPos, newPos){
 
 		//////////////////////////////////////// Se for coroa (reis ou rainhas);
 		case 'coroa':
-			if(partMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
+			if(pieceMovPermited.indexOf(newPosCell) !== -1){//verifica se a nova posição é permitida (se está na array)
 					VerifyJumped();
 				} else{
 					if(XequeClick == 1) return true;
@@ -671,18 +726,21 @@ function Promote(){
 	var id = this.id;
 	promotelinkClicked = document.getElementById(id);//Peça a que se promoverá o peão
 	
-	partPromoted = "pro"+id;//
+	piecePromoted = "pro"+id;//
 	conn = peer.connect(idc);
 	conn.on('open', function(){
-		conn.send(partPromoted);//envia para o outro a nova peça à que será promovido o peão
+		conn.send(piecePromoted);//envia para o outro a nova peça à que será promovido o peão
 	});
 	
 	titleLinkClicked = promotelinkClicked.title+" "+classLinkClicked;//Novo título + classe + número peão, caso haja mais promoções, diferencia
-	partLinkClicked = promotelinkClicked.innerHTML;//Nova peça
+	pieceLinkClicked = promotelinkClicked.innerHTML;//Nova peça
 	console.log(linkClicked.title+" foi promovido a "+titleLinkClicked+"!");
 
 	document.getElementById("promotePart").style.visibility = "hidden";
-	document.getElementById("promotePart").removeEventListener("click", Promote);
+	for(var p = 1; p < 5; p++){
+		var promoteEl = document.getElementById("p8"+p);
+		if(promoteEl) promoteEl.removeEventListener("click", Promote);
+	}
 	setTimeout(Move, 1000);
 }
 
@@ -691,10 +749,10 @@ function VerifyJumped(){
 	if(Xi == Xf){
 		if((Yi > Yf) && ((Yi-Yf)>1)){//Se o Y inicial for maior e andará mais de uma casa
 			var jumped = false;
-			for(partJumped = (Yf+1); partJumped < Yi; partJumped++){
-				if((document.getElementById("p"+Xi+""+partJumped).className) != 'vazias'){//Verifica se tem peça no caminho
+			for(pieceJumped = (Yf+1); pieceJumped < Yi; pieceJumped++){
+				if((document.getElementById("p"+Xi+""+pieceJumped).className) != 'vazias'){//Verifica se tem peça no caminho
 					jumped = true;//salva true se tiver peça no caminho
-					partJumped = Yi;//se tiver, para o laço, uma é necessário para o teste
+					pieceJumped = Yi;//se tiver, para o laço, uma é necessário para o teste
 				}
 			}
 			if(jumped == true){//Se tiver algum valor true na Array jumped (se tem peça no caminho)
@@ -704,17 +762,17 @@ function VerifyJumped(){
 			else{
 				if(newClassLink != 'vazias'){//Se tem peça do outro na posição final, mas não pulou nenhuma
 				if(XequeClick == 1) return Move();
-				console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-				} else console.log(titlepart+" moveu");//Senão, movimento sem captura
+				console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+				} else console.log(titlepiece+" moveu");//Senão, movimento sem captura
 				Move();
 			}
 		}
 		else if((Yf > Yi) && ((Yf-Yi)>1)){//Se o Y final for maior e andará mais de uma casa
 			var jumped = false;
-			for(partJumped = (Yi+1); partJumped < Yf; partJumped++){
-				if((document.getElementById("p"+Xi+""+partJumped).className) != 'vazias'){//Verifica se tem peça no caminho
+			for(pieceJumped = (Yi+1); pieceJumped < Yf; pieceJumped++){
+				if((document.getElementById("p"+Xi+""+pieceJumped).className) != 'vazias'){//Verifica se tem peça no caminho
 					jumped = true;//salva true se tiver peça no caminho
-					partJumped = Yf;//se tiver, para o laço, uma é necessário para o teste
+					pieceJumped = Yf;//se tiver, para o laço, uma é necessário para o teste
 				}
 			}
 			if(jumped == true){
@@ -724,16 +782,16 @@ function VerifyJumped(){
 			else{
 				if(newClassLink != 'vazias'){
 					if(XequeClick == 1) return Move();
-					console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-				} else console.log(titlepart+" moveu");
+					console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+				} else console.log(titlepiece+" moveu");
 				Move();
 			}
 		}
 		else{//Se for somente uma casa que andará
 			if(newClassLink != 'vazias'){
 				if(XequeClick == 1) return Move();
-				console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-			} else console.log(titlepart+" moveu");
+				console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+			} else console.log(titlepiece+" moveu");
 			Move();
 		}
 	}
@@ -741,10 +799,10 @@ function VerifyJumped(){
 	else if(Yi == Yf){
 		if((Xi > Xf) && ((Xi-Xf)>1)){//Se o X inicial for maior e andará mais de uma casa
 			var jumped = false;
-			for(partJumped = (Xf+1); partJumped < Xi; partJumped++){
-				if((document.getElementById("p"+partJumped+""+Yi).className) != 'vazias'){//Verifica se tem peça no caminho
+			for(pieceJumped = (Xf+1); pieceJumped < Xi; pieceJumped++){
+				if((document.getElementById("p"+pieceJumped+""+Yi).className) != 'vazias'){//Verifica se tem peça no caminho
 					jumped = true;//salva true se tiver peça no caminho
-					partJumped = Xi;//se tiver, para o laço, uma é necessário para o teste
+					pieceJumped = Xi;//se tiver, para o laço, uma é necessário para o teste
 				}
 			}
 			if(jumped == true){
@@ -754,17 +812,17 @@ function VerifyJumped(){
 			else{
 				if(newClassLink != 'vazias'){
 					if(XequeClick == 1) return Move();
-					console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-				} else console.log(titlepart+" moveu");
+					console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+				} else console.log(titlepiece+" moveu");
 				Move();
 			}
 		}
 		else if((Xf > Xi) && ((Xf-Xi)>1)){//Se o X final for maior e andará mais de uma casa
 			var jumped = false;
-			for(partJumped = (Xi+1); partJumped < Xf; partJumped++){
-				if((document.getElementById("p"+partJumped+""+Yi).className) != 'vazias'){//Verifica se tem peça no caminho
+			for(pieceJumped = (Xi+1); pieceJumped < Xf; pieceJumped++){
+				if((document.getElementById("p"+pieceJumped+""+Yi).className) != 'vazias'){//Verifica se tem peça no caminho
 					jumped = true;//salva true se tiver peça no caminho
-					partJumped = Xf;//se tiver, para o laço, uma é necessário para o teste
+					pieceJumped = Xf;//se tiver, para o laço, uma é necessário para o teste
 				}
 			}
 			if(jumped == true){
@@ -774,16 +832,16 @@ function VerifyJumped(){
 			else{
 				if(newClassLink != 'vazias'){
 					if(XequeClick == 1) return Move();
-					console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-				} else console.log(titlepart+" moveu");
+					console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+				} else console.log(titlepiece+" moveu");
 				Move();
 			}
 		}
 		else{//Se for somente uma casa que andará
 			if(newClassLink != 'vazias'){
 				if(XequeClick == 1) return Move();
-				console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-			} else console.log(titlepart+" moveu");
+				console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+			} else console.log(titlepiece+" moveu");
 			Move();
 		}
 	}
@@ -804,18 +862,18 @@ function VerifyJumped(){
 			var jumped = false;
 
 			if(dir == "crescente"){
-				for(partJumped = (Xi+1); partJumped < Xf; partJumped++){
-					if((document.getElementById("p"+partJumped+""+(Yi+partJumped-Xi)).className) != 'vazias'){//Verifica se tem peça no caminho
+				for(pieceJumped = (Xi+1); pieceJumped < Xf; pieceJumped++){
+					if((document.getElementById("p"+pieceJumped+""+(Yi+pieceJumped-Xi)).className) != 'vazias'){//Verifica se tem peça no caminho
 						jumped = true;//salva true se tiver peça no caminho
-						partJumped = Xf;//se tiver, para o laço, uma é necessário para o teste
+						pieceJumped = Xf;//se tiver, para o laço, uma é necessário para o teste
 					}
 				}
 			}
 			else{
-				for(partJumped = (Xf+1); partJumped < Xi; partJumped++){
-					if((document.getElementById("p"+partJumped+""+(Yi+partJumped-Xi)).className) != 'vazias'){//Verifica se tem peça no caminho
+				for(pieceJumped = (Xf+1); pieceJumped < Xi; pieceJumped++){
+					if((document.getElementById("p"+pieceJumped+""+(Yi+pieceJumped-Xi)).className) != 'vazias'){//Verifica se tem peça no caminho
 						jumped = true;//salva true se tiver peça no caminho
-						partJumped = Xi;//se tiver, para o laço, uma é necessário para o teste
+						pieceJumped = Xi;//se tiver, para o laço, uma é necessário para o teste
 					}
 				}
 			}
@@ -827,8 +885,8 @@ function VerifyJumped(){
 			else{
 				if(newClassLink != 'vazias'){
 					if(XequeClick == 1) return Move();
-					console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-				} else console.log(titlepart+" moveu");
+					console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+				} else console.log(titlepiece+" moveu");
 				Move();
 			}
 		}
@@ -847,18 +905,18 @@ function VerifyJumped(){
 			var jumped = false;
 
 			if(dir == "crescente"){
-				for(partJumped = (Xi+1); partJumped < Xf; partJumped++){
-					if((document.getElementById("p"+partJumped+""+(Yi+Xi-partJumped)).className) != 'vazias'){//Verifica se tem peça no caminho
+				for(pieceJumped = (Xi+1); pieceJumped < Xf; pieceJumped++){
+					if((document.getElementById("p"+pieceJumped+""+(Yi+Xi-pieceJumped)).className) != 'vazias'){//Verifica se tem peça no caminho
 						jumped = true;//salva true se tiver peça no caminho
-						partJumped = Xf;//se tiver, para o laço, uma é necessário para o teste
+						pieceJumped = Xf;//se tiver, para o laço, uma é necessário para o teste
 					}
 				}
 			}
 			else{
-				for(partJumped = (Xf+1); partJumped < Xi; partJumped++){
-					if((document.getElementById("p"+partJumped+""+(Yi+Xi-partJumped)).className) != 'vazias'){//Verifica se tem peça no caminho
+				for(pieceJumped = (Xf+1); pieceJumped < Xi; pieceJumped++){
+					if((document.getElementById("p"+pieceJumped+""+(Yi+Xi-pieceJumped)).className) != 'vazias'){//Verifica se tem peça no caminho
 						jumped = true;//salva true se tiver peça no caminho
-						partJumped = Xi;//se tiver, para o laço, uma é necessário para o teste
+						pieceJumped = Xi;//se tiver, para o laço, uma é necessário para o teste
 					}
 				}
 			}
@@ -870,16 +928,16 @@ function VerifyJumped(){
 			else{
 				if(newClassLink != 'vazias'){
 					if(XequeClick == 1) return Move();
-					console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-				} else console.log(titlepart+" moveu");
+					console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+				} else console.log(titlepiece+" moveu");
 				Move();
 			}
 		}
 		else{//Se for somente uma casa que andará
 			if(newClassLink != 'vazias'){
 				if(XequeClick == 1) return Move();
-				console.log(titlepart+" captura "+newLink.title+"!");//Movimento de captura
-			} else console.log(titlepart+" moveu");
+				console.log(titlepiece+" captura "+newLink.title+"!");//Movimento de captura
+			} else console.log(titlepiece+" moveu");
 			Move();
 		}
 	}
@@ -918,7 +976,7 @@ function Move(){
 		/*	Adição dos atributos ao novo link, o local que a peça ficará.	*/
 		newLink.className = classLinkClicked;//define sua classe
 		newLink.title = titleLinkClicked;//seu nome.
-		newLink.innerHTML = partLinkClicked;//Coloca o UNICODE[peça] do link clicado.
+		newLink.innerHTML = pieceLinkClicked;//Coloca o UNICODE[peça] do link clicado.
 
 		if(newLink.className == "xequed"){//Aqui é o escape do Xeque com o Rei (o outro player verifica se ainda está em xeque)
 			newLink.className = ClassBeforeXeque;//seta classe anterior (pretas ou brancas)
@@ -977,13 +1035,13 @@ function MoveOther(oldPosOther, newPosOther){
 	if(promoting == 1){//Se o outro está se promovendo
 		//var n = OldLink.title.slice(-1);//número do peão se promovendo
 		titleLinkClickedOther = promotelinkClicked.title+" "+classLinkClickedOther;//Novo título + classe
-		partLinkClickedOther = promotelinkClicked.innerHTML;//Nova peça
+		pieceLinkClickedOther = promotelinkClicked.innerHTML;//Nova peça
 		console.log(OldLink.title+" foi promovido a "+titleLinkClickedOther+"!");
 		promoting = 0;//promoteLinkClicked definido em recebeConvite()
 	}
 	else{
 		titleLinkClickedOther = OldLink.title;//salva título da peça 
-		partLinkClickedOther = OldLink.innerHTML;//e a peça, os três são passados para a nova posição
+		pieceLinkClickedOther = OldLink.innerHTML;//e a peça, os três são passados para a nova posição
 	}
 
 	if(NewLink.className != 'vazias'){
@@ -997,7 +1055,7 @@ function MoveOther(oldPosOther, newPosOther){
 	//	Adição dos atributos ao novo link, o local que a peça ficará.
 	NewLink.className = classLinkClickedOther;//define sua classe
 	NewLink.title = titleLinkClickedOther;//seu nome.
-	NewLink.innerHTML = partLinkClickedOther;//Coloca o UNICODE[peça] do link clicado.
+	NewLink.innerHTML = pieceLinkClickedOther;//Coloca o UNICODE[peça] do link clicado.
 
 	Movements++;
 
@@ -1009,7 +1067,7 @@ function MoveOther(oldPosOther, newPosOther){
 		document.getElementById('vez').innerHTML = "sua.";//Se movimentos for par, vez das brancas, vez do convidado.
 	} else document.getElementById('vez').innerHTML = "do outro jogador.";
 
-	conn.close();
+	if(conn && conn.close) conn.close();
 	setTimeout(KingHealth, 100);
 }
 
@@ -1033,7 +1091,7 @@ function Xeque(){
 		if(allOther[jxeque].title == nameOtherKing){//Quando achar o rei oposto
 			OtherKing = allOther[jxeque];
 			for(var ixeque = 0, cacheArray = allMy.length; ixeque < cacheArray; ixeque++){//Percorre todas as peças da classe
-				verifyPartMovement(allMy[ixeque], OtherKing);//verifica se está em posição de ataque ao rei
+				verifyPieceMovement(allMy[ixeque], OtherKing);//verifica se está em posição de ataque ao rei
 				//console.log(allMy[ixeque].id+" com "+OtherKing.id);
 			}
 			jxeque = allOther.length;//para o laço
@@ -1102,7 +1160,7 @@ function KingHealth(){
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
 /*
-document.getElementById('p'+(+i+1)+""+(+j+1)).innerHTML = partLinkClicked;//modo de somar L+1 e C+1, transformando primeiramente as strings p/ nº.
+document.getElementById('p'+(+i+1)+""+(+j+1)).innerHTML = pieceLinkClicked;//modo de somar L+1 e C+1, transformando primeiramente as strings p/ nº.
 	//O sinal + sucedido de uma variável do tipo string, a  converte p/ nº. Ex.: Se i = "2"; +i = 2;
 	//Logo, +i+1 = 3. Se não convertesse, ficaria i+1 = "21".
 */

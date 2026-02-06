@@ -1,70 +1,124 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8" />
 		<title>&#9823; Multiplayer Chess</title>
-		<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script><!--MULTIPLAYER-->
+		<!-- <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script> -->
+		<script type="text/javascript" src="JS/peer.min.js"></script>
+		<!-- <script type="text/javascript" src="JS/peer.min.js"></script> -->
 		<script type="text/javascript" src="JS/JS.js"></script>
 		<link rel="stylesheet" type="text/css" href="CSS/CSS.css">
 	</head>
 
 	
 	<body>
-		<div id="header">
-			<div id="convidar">
-				Seu ID de jogo é: <span id="seuid"></span>. 
-				Para jogar com alguém, <a id="play" href="#">clique aqui</a>
+		<div id="app">
+			<div id="header">
+				<div id="brand">
+					<h1>&#9823; Multiplayer Chess</h1>
+					<p>Partidas rápidas P2P, com foco em simplicidade e latência baixa.</p>
+				</div>
+				<div id="subhead">
+					<span>Modo atual: partida direta por ID</span>
+					<span class="dot">·</span>
+					<span>Compartilhe seu ID e convide um amigo</span>
+				</div>
 			</div>
-			<div id="stats">
-				<span id"turno">
-					Você é: <span id="pessoa"></span>. A vez de jogar é <span id="vez"></span>
-				</span>
+
+			<div id="main">
+				<div id="board-panel">
+					<div id="promotePart"><a id="p81" title="Cavalo" class="angels" href="#">&#9816;</a><a id="p82" title="Bispo" class="angels" href="#">&#9815;</a><a id="p83" title="Rainha" class="angels" href="#">&#9813;</a><a id="p84" title="Torre" class="angels" href="#">&#9814;</a></div>
+					<div id="content">
+						<table id="chess_board"> <!--width="100%"-->
+
+						    <tr id="line1">
+						    <!--<td id="00"></td><td id="01"></td><td id="02"></td><td id="03"></td><td id="04"></td><td id="05"></td><td id="06"></td><td id="07"></td>-->
+						    </tr>
+
+						    <tr id="line2">
+						    <!--<td id="10"></td><td id="11"></td><td id="12"></td><td id="13"></td><td id="14"></td><td id="15"></td><td id="16"></td><td id="17"></td>-->
+						    </tr>
+
+						    <tr id="line3">
+						    <!--<td id="20"></td><td id="21"></td><td id="22"></td><td id="23"></td><td id="24"></td><td id="25"></td><td id="26"></td><td id="27"></td>-->
+						    </tr>
+
+						    <tr id="line4">
+						    <!--<td id="30"></td><td id="31"></td><td id="32"></td><td id="33"></td><td id="34"></td><td id="35"></td><td id="36"></td><td id="37"></td>-->
+						    </tr>
+
+						    <tr id="line5">
+						    <!--<td id="40"></td><td id="41"></td><td id="42"></td><td id="43"></td><td id="44"></td><td id="45"></td><td id="46"></td><td id="47"></td>-->
+						    </tr>
+
+						    <tr id="line6">
+						    <!--<td id="50"></td><td id="51"></td><td id="52"></td><td id="53"></td><td id="54"></td><td id="55"></td><td id="56"></td><td id="57"></td>-->
+						    </tr>
+
+						    <tr id="line7">
+						    <!--<td id="60"></td><td id="61"></td><td id="62"></td><td id="63"></td><td id="64"></td><td id="65"></td><td id="66"></td><td id="67"></td>-->
+						    </tr>
+
+						    <tr id="line8">
+						    <!--<td id="70"></td><td id="71"></td><td id="72"></td><td id="73"></td><td id="74"></td><td id="75"></td><td id="76"></td><td id="77"></td>-->
+						    </tr>
+						</table>
+					</div>
+				</div>
+
+				<aside id="side-panel">
+					<div class="card" id="connection-card">
+						<h2>Conexão P2P</h2>
+						<div id="convidar">
+							Seu ID de jogo é: <span id="seuid"></span>. 
+							Para jogar com alguém, <a id="play" href="#">clique aqui</a>
+						</div>
+						<div class="row">
+							<span>Status:</span>
+							<strong id="conn-status">offline</strong>
+						</div>
+						<div class="row">
+							<span>Oponente:</span>
+							<strong id="opponent-id">—</strong>
+						</div>
+						<button id="copy-id" type="button">Copiar meu ID</button>
+						<p class="hint">Dica: se você hospeda seu próprio PeerServer, o app fica 100% independente.</p>
+					</div>
+
+					<div class="card" id="game-card">
+						<h2>Estado da Partida</h2>
+						<div id="stats">
+							<span id="turno">
+								Você é: <span id="pessoa"></span>. A vez de jogar é <span id="vez"></span>
+							</span>
+						</div>
+						<div id="xeque"><button>DAR XEQUE</button></div>
+					</div>
+
+					<div class="card">
+						<h2>Controles</h2>
+						<ul>
+							<li>Clique em uma peça para selecioná-la, depois clique na casa destino.</li>
+							<li>O destaque laranja indica a peça selecionada.</li>
+							<li>Use o botão de xeque para marcar o rei adversário.</li>
+						</ul>
+					</div>
+
+					<div class="card">
+						<h2>Em Construção</h2>
+						<ul>
+							<li>Relógio de xadrez e controles de tempo.</li>
+							<li>Chat dentro da partida e mensagens rápidas.</li>
+							<li>Revanche automática e histórico de partidas.</li>
+							<li>Detecção completa de xeque-mate e empate.</li>
+						</ul>
+					</div>
+				</aside>
 			</div>
-		</div>	
 
-		<div id="promotePart"><a id="p81" title="Cavalo" class="angels" href="#">&#9816;</a><a id="p82" title="Bispo" class="angels" href="#">&#9815;</a><a id="p83" title="Rainha" class="angels" href="#">&#9813;</a><a id="p84" title="Torre" class="angels" href="#">&#9814;</a></div>
-		
-		<div id="content">
-			<table id="chess_board"> <!--width="100%"-->
-
-			    <tr id="line1">
-			    <!--<td id="00"></td><td id="01"></td><td id="02"></td><td id="03"></td><td id="04"></td><td id="05"></td><td id="06"></td><td id="07"></td>-->
-			    </tr>
-
-			    <tr id="line2">
-			    <!--<td id="10"></td><td id="11"></td><td id="12"></td><td id="13"></td><td id="14"></td><td id="15"></td><td id="16"></td><td id="17"></td>-->
-			    </tr>
-
-			    <tr id="line3">
-			    <!--<td id="20"></td><td id="21"></td><td id="22"></td><td id="23"></td><td id="24"></td><td id="25"></td><td id="26"></td><td id="27"></td>-->
-			    </tr>
-
-			    <tr id="line4">
-			    <!--<td id="30"></td><td id="31"></td><td id="32"></td><td id="33"></td><td id="34"></td><td id="35"></td><td id="36"></td><td id="37"></td>-->
-			    </tr>
-
-			    <tr id="line5">
-			    <!--<td id="40"></td><td id="41"></td><td id="42"></td><td id="43"></td><td id="44"></td><td id="45"></td><td id="46"></td><td id="47"></td>-->
-			    </tr>
-
-			    <tr id="line6">
-			    <!--<td id="50"></td><td id="51"></td><td id="52"></td><td id="53"></td><td id="54"></td><td id="55"></td><td id="56"></td><td id="57"></td>-->
-			    </tr>
-
-			    <tr id="line7">
-			    <!--<td id="60"></td><td id="61"></td><td id="62"></td><td id="63"></td><td id="64"></td><td id="65"></td><td id="66"></td><td id="67"></td>-->
-			    </tr>
-
-			    <tr id="line8">
-			    <!--<td id="70"></td><td id="71"></td><td id="72"></td><td id="73"></td><td id="74"></td><td id="75"></td><td id="76"></td><td id="77"></td>-->
-			    </tr>
-			</table>
-		</div>
-
-		<div id="xeque"><button>DAR XEQUE</button></div>
-		
-		<div id="footer">
-			<em>Developed by <a target="_BLANK" href="http://twitter.com/#!/LeowLopez">Leo Wender</a></em>
+			<div id="footer">
+				<em>Developed by <a target="_BLANK" href="http://twitter.com/#!/LeowLopez">Leo Wender</a></em>
+			</div>
 		</div>
 
 	</body>
